@@ -4,6 +4,7 @@
     --primary-color: #1e40af;
     --secondary-color: #3b82f6;
     --accent-color: #f59e0b;
+    --download-color: #10b981;
     --text-color: #1f2937;
     --light-text: #6b7280;
     --background-color: #f3f4f6;
@@ -114,6 +115,37 @@ header h2 {
 }
 
 .form-group input:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Date of Birth Dropdown Styles */
+.dob-container {
+    display: flex;
+    gap: 10px;
+}
+
+.dob-select {
+    flex: 1;
+}
+
+.dob-select select {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.3s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+
+.dob-select select:focus {
     outline: none;
     border-color: var(--secondary-color);
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
@@ -265,25 +297,37 @@ table tr:last-child td {
     color: var(--error-color);
 }
 
+.result-footer-content {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.result-footer-content p {
+    color: var(--light-text);
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.timestamp {
+    font-style: italic;
+    font-size: 12px;
+}
+
 .result-footer {
     text-align: center;
     padding-top: 20px;
     border-top: 1px solid var(--border-color);
-}
-
-.result-footer p {
-    color: var(--light-text);
-    font-size: 14px;
-    margin-bottom: 20px;
+    margin-top: 20px;
 }
 
 .action-buttons {
     display: flex;
     justify-content: center;
     gap: 15px;
+    flex-wrap: wrap;
 }
 
-.btn-print, .btn-back {
+.btn-print, .btn-download, .btn-back {
     padding: 10px 20px;
     border-radius: 6px;
     font-weight: 500;
@@ -304,6 +348,16 @@ table tr:last-child td {
     background-color: #d97706;
 }
 
+.btn-download {
+    background-color: var(--download-color);
+    color: white;
+    border: none;
+}
+
+.btn-download:hover {
+    background-color: #059669;
+}
+
 .btn-back {
     background-color: transparent;
     color: var(--primary-color);
@@ -314,7 +368,7 @@ table tr:last-child td {
     background-color: rgba(30, 64, 175, 0.1);
 }
 
-.btn-print i, .btn-back i {
+.btn-print i, .btn-download i, .btn-back i {
     margin-right: 8px;
 }
 
@@ -414,8 +468,13 @@ footer {
         gap: 10px;
     }
     
-    .btn-print, .btn-back {
+    .btn-print, .btn-download, .btn-back {
         width: 100%;
+    }
+    
+    .dob-container {
+        flex-direction: column;
+        gap: 10px;
     }
 }
 

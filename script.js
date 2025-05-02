@@ -6,8 +6,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadingElement = document.getElementById('loading');
     const errorMessage = document.getElementById('error-message');
     const printBtn = document.getElementById('print-btn');
+    const downloadBtn = document.getElementById('download-btn');
     const backBtn = document.getElementById('back-btn');
     const errorBackBtn = document.getElementById('error-back-btn');
+    const generationDate = document.getElementById('generation-date');
+    
+    // DOB Dropdown Elements
+    const dobDay = document.getElementById('dob-day');
+    const dobMonth = document.getElementById('dob-month');
+    const dobYear = document.getElementById('dob-year');
     
     // Student Info Elements
     const studentName = document.getElementById('student-name');
@@ -19,6 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalMarks = document.getElementById('total-marks');
     const overallGrade = document.getElementById('overall-grade');
     const resultStatus = document.getElementById('result-status');
+    
+    // Initialize DOB dropdowns
+    initializeDobDropdowns();
     
     // Subject mapping for display
     const subjectMapping = {
@@ -32,23 +42,60 @@ document.addEventListener('DOMContentLoaded', function() {
         'Opt_Elec': 'Optional Elective'
     };
     
+    // Initialize DOB dropdowns
+    function initializeDobDropdowns() {
+        // Add days (1-31)
+        for (let i = 1; i <= 31; i++) {
+            const option = document.createElement('option');
+            option.value = i.toString().padStart(2, '0');
+            option.textContent = i;
+            dobDay.appendChild(option);
+        }
+        
+        // Add months (1-12)
+        const months = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        for (let i = 1; i <= 12; i++) {
+            const option = document.createElement('option');
+            option.value = i.toString().padStart(2, '0');
+            option.textContent = months[i - 1];
+            dobMonth.appendChild(option);
+        }
+        
+        // Add years (2000-2012)
+        for (let i = 2000; i <= 2012; i++) {
+            const option = document.createElement('option');
+            option.value = i.toString().substring(2); // Take last 2 digits (YY format)
+            option.textContent = i;
+            dobYear.appendChild(option);
+        }
+    }
+    
     // Form submission handler
     searchForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
         const rollNo = document.getElementById('roll-no').value.trim();
-        const dob = document.getElementById('dob').value.trim();
+        const day = dobDay.value;
+        const month = dobMonth.value;
+        const year = dobYear.value;
         
         // Basic validation
-        if (!rollNo || !dob) {
-            showError('Please enter both Roll Number and Date of Birth.');
+        if (!rollNo) {
+            showError('Please enter your Roll Number.');
             return;
         }
         
-        if (dob.length !== 6 || !/^\d+$/.test(dob)) {
-            showError('Date of Birth should be 6 digits in DDMMYY format.');
+        if (!day || !month || !year) {
+            showError('Please select your complete Date of Birth.');
             return;
         }
+        
+        // Combine DOB in DDMMYY format
+        const dob = day + month + year;
         
         // Show loading
         searchSection.style.display = 'none';
@@ -61,50 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Fetch result from API
     function fetchResult(rollNo, dob) {
-        // For demo purposes, we'll use the sample data provided
-        // In a real application, you would make an actual API call
-        
-        // Simulate API call delay
-        // setTimeout(() => {
-        //     // Check if the roll number and DOB match our sample data
-        //     if (rollNo === '602822N0262' && dob === '100608') {
-        //         const resultData = {
-        //             "First_Language_Grade": "B+",
-        //             "Mathematics_Marks": "26",
-        //             "Physical_Science_Grade": "B",
-        //             "Geography_Marks": "52",
-        //             "Second_Language_Marks": "51",
-        //             "Reg_No": "5242052921",
-        //             "Mathematics_Grade": "C",
-        //             "Aggregate": "310",
-        //             "Life_Science_Grade": "B+",
-        //             "School_Index": "L4121",
-        //             "Life_Science_Marks": "48",
-        //             "History_Grade": "B",
-        //             "Opt_Elec_Marks": "",
-        //             "Geography_Grade": "B+",
-        //             "Physical_Science_Marks": "42",
-        //             "Remarks": "PASS",
-        //             "Opt_Elec_Grade": "",
-        //             "Name": "SHREYA HAZRA",
-        //             "History_Marks": "40",
-        //             "Date_of_Birth": "100608",
-        //             "First_Language_Marks": "51",
-        //             "Second_Language_Grade": "B+",
-        //             "Overall_Grade": "B",
-        //             "Roll_No": "602822N0262"
-        //         };
-        //         displayResult(resultData);
-        //     } else {
-        //         // Show error for non-matching data
-        //         showError('No result found. Please check your Roll Number and Date of Birth.');
-        //     }
-            
-        //     loadingElement.style.display = 'none';
-        // }, 1500);
-        
-        // In a real application, you would use fetch API like this:
-       
         fetch(`https://boardresultapi.abplive.com/wb/2025/10/${rollNo}/${dob}`)
             .then(response => {
                 if (!response.ok) {
@@ -121,7 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .finally(() => {
                 loadingElement.style.display = 'none';
             });
-        
     }
     
     // Display result data
@@ -189,6 +191,10 @@ document.addEventListener('DOMContentLoaded', function() {
             resultStatus.classList.remove('pass', 'fail');
         }
         
+        // Set generation date
+        const now = new Date();
+        generationDate.textContent = now.toLocaleString();
+        
         // Show result section
         resultSection.style.display = 'block';
     }
@@ -206,6 +212,136 @@ document.addEventListener('DOMContentLoaded', function() {
     printBtn.addEventListener('click', function() {
         window.print();
     });
+    
+    // Download PDF button handler
+    downloadBtn.addEventListener('click', function() {
+        // Show loading message
+        const originalButtonText = downloadBtn.innerHTML;
+        downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+        downloadBtn.disabled = true;
+        
+        // Use setTimeout to allow the UI to update before starting the PDF generation
+        setTimeout(() => {
+            generateOptimizedPDF().then(() => {
+                // Reset button text
+                downloadBtn.innerHTML = originalButtonText;
+                downloadBtn.disabled = false;
+            }).catch(error => {
+                console.error('Error generating PDF:', error);
+                downloadBtn.innerHTML = originalButtonText;
+                downloadBtn.disabled = false;
+                alert('Failed to generate PDF. Please try again.');
+            });
+        }, 100);
+    });
+    
+    // Generate optimized PDF function (smaller file size)
+    async function generateOptimizedPDF() {
+        const { jsPDF } = window.jspdf;
+        
+        try {
+            // Create a new PDF document with compression
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
+            });
+            
+            // Get student data
+            const name = studentName.textContent;
+            const roll = studentRoll.textContent;
+            const regNo = studentReg.textContent;
+            const birthDate = studentDob.textContent;
+            const school = schoolIndex.textContent;
+            const aggregate = totalMarks.textContent;
+            const grade = overallGrade.textContent;
+            const result = resultStatus.textContent;
+            
+            // Set font sizes
+            const titleSize = 16;
+            const subtitleSize = 12;
+            const normalSize = 10;
+            const smallSize = 8;
+            
+            // Add header
+            pdf.setFontSize(titleSize);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('West Bengal Board of Secondary Education', 105, 20, { align: 'center' });
+            
+            pdf.setFontSize(subtitleSize);
+            pdf.text('Secondary Examination Result 2025', 105, 30, { align: 'center' });
+            
+            // Add student info
+            pdf.setFontSize(normalSize);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Student Information', 20, 45);
+            
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(`Name: ${name}`, 20, 55);
+            pdf.text(`Roll No: ${roll}`, 20, 62);
+            pdf.text(`Registration No: ${regNo}`, 20, 69);
+            pdf.text(`Date of Birth: ${birthDate}`, 20, 76);
+            pdf.text(`School Index: ${school}`, 20, 83);
+            
+            // Add marks table
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Subject-wise Marks', 20, 95);
+            
+            // Table headers
+            pdf.setFillColor(240, 240, 240);
+            pdf.rect(20, 100, 170, 8, 'F');
+            pdf.text('Subject', 25, 106);
+            pdf.text('Marks', 110, 106);
+            pdf.text('Grade', 150, 106);
+            
+            // Table rows
+            let yPos = 115;
+            const rows = marksBody.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(cells[0].textContent, 25, yPos);
+                pdf.text(cells[1].textContent, 110, yPos);
+                pdf.text(cells[2].textContent, 150, yPos);
+                yPos += 8;
+            });
+            
+            // Add total and result
+            pdf.setFillColor(240, 240, 240);
+            pdf.rect(20, yPos, 170, 8, 'F');
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Aggregate', 25, yPos + 6);
+            pdf.text(aggregate, 110, yPos + 6);
+            pdf.text(grade, 150, yPos + 6);
+            
+            yPos += 15;
+            pdf.text(`Result: ${result}`, 105, yPos, { align: 'center' });
+            
+            // Add footer
+            yPos += 20;
+            pdf.setFontSize(smallSize);
+            pdf.setFont('helvetica', 'italic');
+            pdf.text('This is a computer-generated result. No signature is required.', 105, yPos, { align: 'center' });
+            
+            yPos += 5;
+            pdf.text(`Generated on: ${new Date().toLocaleString()}`, 105, yPos, { align: 'center' });
+            
+            // Get student name for the filename
+            const studentNameText = name.trim() || 'result';
+            const rollNoText = roll.trim() || '';
+            
+            // Generate filename
+            const filename = `${studentNameText.replace(/\s+/g, '_')}_${rollNoText}_Marksheet.pdf`;
+            
+            // Save the PDF with compression
+            pdf.save(filename);
+        } catch (error) {
+            console.error('Error in PDF generation:', error);
+            throw error;
+        }
+    }
     
     // Back button handlers
     backBtn.addEventListener('click', function() {
